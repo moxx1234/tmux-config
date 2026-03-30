@@ -1,0 +1,20 @@
+#!/bin/bash
+MODE="${1:-overwrite}"
+FILE="/tmp/tmux-sel.log"
+
+PANE_TITLE=$(tmux display-message -p "#{pane_title}")
+WINDOW_NAME=$(tmux display-message -p "#{window_name}")
+PANE_CMD=$(tmux display-message -p "#{pane_current_command}")
+TIMESTAMP=$(date "+%H:%M:%S")
+
+HEADER="### [$TIMESTAMP] $WINDOW_NAME / $PANE_TITLE ($PANE_CMD)"
+FOOTER="---"
+
+if [ "$MODE" = "overwrite" ]; then
+  { echo "$HEADER"; echo; cat; echo; echo "$FOOTER"; echo; } > "$FILE"
+else
+  { echo "$HEADER"; echo; cat; echo; echo "$FOOTER"; echo; } >> "$FILE"
+fi
+
+echo -n "@$FILE" | ~/.dotfiles/bin/tmux-clip
+tmux display-message "$([ "$MODE" = "overwrite" ] && echo "Captured" || echo "Appended") — $WINDOW_NAME/$PANE_TITLE"
